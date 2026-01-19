@@ -107,75 +107,93 @@ user_problem_statement: "Test the Prascy Bandyci e-commerce store at https://swi
 frontend:
   - task: "Store Home Page"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/pages/store/StorePage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Initial testing required - verify hero section with 'Ekskluzywne produkty dla wymagających' heading, product cards with prices/images/category badges, and category filter buttons (Wszystkie, Premium, Classic, etc.)"
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Homepage loads correctly with hero section 'Ekskluzywne produkty dla wymagających', product grid displays products, category filter 'Wszystkie' found. Minor: Hero text selector timeout but content is visible in screenshots. Core functionality working."
 
   - task: "Product Detail Page"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/pages/store/ProductPage.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Initial testing required - verify product image/name/price display, variant selector (S,M,L,XL), quantity controls (+/-), 'Kup teraz' and 'Dodaj do koszyka' buttons, and verification warning for H2H products"
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Product detail page (/product/2) working correctly. MEF Classic product displays with correct price 199.99 zł, 'Kup teraz' and 'Dodaj do koszyka' buttons present and functional. Variant selector shows Standard/Premium options. Core functionality working."
 
   - task: "Shopping Cart Flow"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/pages/store/CartPage.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Initial testing required - add product to cart from /product/2, navigate to /cart, verify item appears, check quantity controls, verify total calculation"
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL ISSUE: Cart functionality partially broken. Products can be added to cart (button works), but cart page shows items inconsistently. Cart counter/badge not visible. Quantity controls not found. This affects core e-commerce functionality."
 
   - task: "Checkout Page"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/pages/store/CheckoutPage.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Initial testing required - navigate from cart to checkout, verify customer data form (name/email/phone/telegram), check delivery method selector (InPost vs H2H), payment method selector (Stripe/Przelewy24/BLIK), verify consent checkboxes"
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL ISSUE: Checkout form validation blocking progression. Customer data form fields not accepting input (timeout on form filling). Payment button disabled and cannot proceed to payment methods. Only BLIK payment method visible, missing Stripe/Przelewy24/Telegram Pay options."
 
   - task: "Admin Panel"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/pages/admin/AdminLayout.jsx"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Initial testing required - login with admin@prascy.pl/admin123, verify dashboard stats cards, revenue chart, navigate to Orders/Products/Verifications/Settings pages"
+      - working: true
+        agent: "testing"
+        comment: "TESTED: Admin panel working correctly. Login successful with admin@prascy.pl/admin123. Dashboard displays stats (156 orders, 12 pending, 45,890.5 zł revenue, 3 verifications), revenue chart, recent orders table, and navigation to all sections (Zamówienia, Produkty, Weryfikacje, Ustawienia)."
 
   - task: "Mobile Responsiveness"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/pages/store/StorePage.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "testing"
         comment: "Initial testing required - test store home page on mobile viewport (375x667), verify navigation menu works on mobile"
+      - working: false
+        agent: "testing"
+        comment: "ISSUE: Mobile responsiveness problems. Mobile navigation menu (hamburger) not found. Products not displaying correctly on mobile viewport (375x667). Mobile UX needs improvement."
 
 metadata:
   created_by: "testing_agent"
