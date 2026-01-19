@@ -14,6 +14,7 @@ import DeliverySelector from '@/components/store/DeliverySelector';
 import PaymentForm from '@/components/store/PaymentForm';
 import { useCart } from '@/context/CartContext';
 import { useTelegram } from '@/context/TelegramContext';
+import { useOrders } from '@/context/OrdersContext';
 import { products, deliveryMethods } from '@/data/mockData';
 import { createOrderWithPayment } from '@/services/paymentService';
 import { toast } from 'sonner';
@@ -22,6 +23,7 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, getCartTotal, clearCart } = useCart();
   const { user, isTelegram, hapticFeedback, showMainButton, hideMainButton, webApp } = useTelegram();
+  const { addOrder } = useOrders();
   
   const [customerData, setCustomerData] = useState({
     name: '',
