@@ -7,8 +7,9 @@ import { Separator } from '@/components/ui/separator';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreFooter from '@/components/store/StoreFooter';
 import OrderTimeline from '@/components/store/OrderTimeline';
+import { useOrders } from '@/context/OrdersContext';
 
-// Mock order data for demo
+// Mock order data for demo (fallback)
 const getMockOrder = (orderId) => ({
   id: orderId,
   status: 'verification_pending',
@@ -31,13 +32,19 @@ const getMockOrder = (orderId) => ({
 
 export default function OrderStatusPage() {
   const { orderId } = useParams();
-  const order = getMockOrder(orderId);
+  const { getOrder } = useOrders();
+  
+  // Try to get real order, fallback to mock
+  const savedOrder = getOrder(orderId);
+  const order = savedOrder || getMockOrder(orderId);
 
   const statusLabels = {
     'created': 'Utworzone',
+    'pending_payment': 'Oczekuje na płatność',
     'payment_confirmed': 'Opłacone',
     'verification_pending': 'Oczekuje na weryfikację',
     'verification_approved': 'Zweryfikowane',
+    'processing': 'W przygotowaniu',
     'shipped': 'Wysłane',
     'ready_for_pickup': 'Gotowe do odbioru',
     'delivered': 'Dostarczone'
