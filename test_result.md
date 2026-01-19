@@ -101,3 +101,100 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Test the Prascy Bandyci e-commerce store at https://swift-cart-51.preview.emergentagent.com. This is a Telegram Web App-based online store with gold/black theme for Poland."
+
+frontend:
+  - task: "Store Home Page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/store/StorePage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Initial testing required - verify hero section with 'Ekskluzywne produkty dla wymagających' heading, product cards with prices/images/category badges, and category filter buttons (Wszystkie, Premium, Classic, etc.)"
+
+  - task: "Product Detail Page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/store/ProductPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Initial testing required - verify product image/name/price display, variant selector (S,M,L,XL), quantity controls (+/-), 'Kup teraz' and 'Dodaj do koszyka' buttons, and verification warning for H2H products"
+
+  - task: "Shopping Cart Flow"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/store/CartPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Initial testing required - add product to cart from /product/2, navigate to /cart, verify item appears, check quantity controls, verify total calculation"
+
+  - task: "Checkout Page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/store/CheckoutPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Initial testing required - navigate from cart to checkout, verify customer data form (name/email/phone/telegram), check delivery method selector (InPost vs H2H), payment method selector (Stripe/Przelewy24/BLIK), verify consent checkboxes"
+
+  - task: "Admin Panel"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/admin/AdminLayout.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Initial testing required - login with admin@prascy.pl/admin123, verify dashboard stats cards, revenue chart, navigate to Orders/Products/Verifications/Settings pages"
+
+  - task: "Mobile Responsiveness"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/store/StorePage.jsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Initial testing required - test store home page on mobile viewport (375x667), verify navigation menu works on mobile"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Store Home Page"
+    - "Product Detail Page"
+    - "Shopping Cart Flow"
+    - "Checkout Page"
+    - "Admin Panel"
+    - "Mobile Responsiveness"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "Starting comprehensive testing of Prascy Bandyci e-commerce store. Will test all major flows including store pages, admin panel, and mobile responsiveness. Testing URL: https://swift-cart-51.preview.emergentagent.com"
