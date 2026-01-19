@@ -119,6 +119,25 @@ export default function CheckoutPage() {
           hapticFeedback('notification', 'success');
         }
         
+        // Save order to context
+        addOrder({
+          orderId: result.orderId,
+          customer: customerData,
+          items: cart,
+          subtotal,
+          deliveryCost,
+          total,
+          deliveryMethod,
+          deliveryAddress: deliveryMethod === 'inpost' 
+            ? { locker: lockerCode }
+            : null,
+          pickupLocation: deliveryMethod === 'h2h' ? pickupLocation : null,
+          requiresVerification,
+          status: requiresVerification ? 'verification_pending' : 'payment_confirmed',
+          paymentMethod,
+          paymentId: result.payment?.paymentId
+        });
+        
         // Clear cart
         clearCart();
         
