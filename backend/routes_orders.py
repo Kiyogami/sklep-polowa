@@ -29,6 +29,17 @@ async def create_order(
     """
     now = datetime.now(timezone.utc)
     order_id = generate_order_id()
+    
+    # Extract user info from tg_data to ensure customer mapping is correct/verified
+    user = tg_data.get("user", {})
+    user_id = user.get("id")
+    username = user.get("username")
+    
+    # Optional: Force override customer telegram ID with authenticated one
+    if user_id:
+        body.customer.telegramUserId = user_id
+    if username:
+        body.customer.telegramUsername = username
 
     # Weryfikacja: wideo wymagane tylko dla H2H
     requires_verification = body.delivery.method == "h2h"
@@ -61,10 +72,22 @@ async def create_order(
 
 
 @router.get("/{order_id}", response_model=OrderOut)
-async def get_order(order_id: str):
+async def get_order(
+    order_id: str,
+    tg_data: dict = Depends(require_telegram_webapp)
+):
     doc = await db.orders.find_one({"id": order_id}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Order not found")
+        
+    # Check if user owns the order (security check)
+    user_id = tg_data.get("user", {}).get("id")
+    order_user_id = doc.get("customer", {}).get("telegramUserId")
+    
+    # If user_id is present and matches, or if strict check is needed
+    # For now, if order has telegramUserId, it must match.
+    if order_user_id and user_id and order_user_id != user_id:
+         raise HTTPException(status_code=403, detail="Not authorized to view this order")
 
     doc["createdAt"] = datetime.fromisoformat(doc["createdAt"])
     doc["updatedAt"] = datetime.fromisoformat(doc["updatedAt"])
@@ -72,8 +95,22 @@ async def get_order(order_id: str):
 
 
 @router.get("", response_model=List[OrderOut])
-async def list_orders():
-    cursor = db.orders.find({}, {"_id": 0}).sort("createdAt", -1)
+async def list_orders(
+    tg_data: dict = Depends(require_telegram_webapp)
+):
+    """List orders for the authenticated Telegram user."""
+    user_id = tg_data.get("user", {}).get("id")
+    
+    if not user_id:
+        # Should not happen if require_telegram_webapp passes, but just in case
+        return []
+
+    # Filter by telegramUserId
+    cursor = db.orders.find(
+        {"customer.telegramUserId": user_id}, 
+        {"_id": 0}
+    ).sort("createdAt", -1)
+    
     docs = await cursor.to_list(length=200)
     out: List[OrderOut] = []
     for d in docs:
