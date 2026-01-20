@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 
+from pydantic import BaseModel
+
 from server import db
 from models_order import OrderOut
 from dependencies import require_admin
