@@ -1,15 +1,35 @@
-import { useState } from 'react';
-import { Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Filter, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreFooter from '@/components/store/StoreFooter';
 import HeroSection from '@/components/store/HeroSection';
 import ProductCard from '@/components/store/ProductCard';
-import { products, categories } from '@/data/mockData';
+import { categories } from '@/data/mockData';
+import { productsApi } from '@/services/api';
+import { toast } from 'sonner';
 
 export default function StorePage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await productsApi.getAll();
+        setProducts(data);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        toast.error('Nie udało się pobrać produktów.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const filteredProducts = selectedCategory === 'all' 
     ? products 
@@ -62,21 +82,30 @@ export default function StorePage() {
               </div>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
+
             {/* Products Grid */}
-            <div className="product-grid">
-              {filteredProducts.map((product, index) => (
-                <div 
-                  key={product.id} 
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <ProductCard product={product} />
-                </div>
-              ))}
-            </div>
+            {!loading && (
+              <div className="product-grid">
+                {filteredProducts.map((product, index) => (
+                  <div 
+                    key={product.id} 
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Empty state */}
-            {filteredProducts.length === 0 && (
+            {!loading && filteredProducts.length === 0 && (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">
                   Brak produktów w tej kategorii.
