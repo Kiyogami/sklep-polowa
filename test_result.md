@@ -157,7 +157,7 @@ frontend:
     implemented: true
     working: false
     file: "/app/frontend/src/pages/store/CheckoutPage.jsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -167,6 +167,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "CRITICAL ISSUE: Checkout form validation blocking progression. Customer data form fields not accepting input (timeout on form filling). Payment button disabled and cannot proceed to payment methods. Only BLIK payment method visible, missing Stripe/Przelewy24/Telegram Pay options."
+      - working: false
+        agent: "testing"
+        comment: "RETESTED: Checkout form fields timeout when trying to fill them. However, 18+ verification checkbox IS IMPLEMENTED correctly ('Potwierdzam, że mam ukończone 18 lat i zamawiam produkty wyłącznie do własnego użytku'). Payment methods include BLIK, Stripe, Przelewy24. Cannot complete full flow due to form input timeouts."
 
   - task: "Admin Panel"
     implemented: true
