@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from server import db
+from database import db
 from models_order import OrderOut
 from dependencies import require_admin
 from services.telegram_service import send_telegram_message

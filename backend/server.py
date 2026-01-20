@@ -1,7 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
@@ -10,20 +9,17 @@ from typing import List
 import uuid
 from datetime import datetime, timezone
 
+# Routes
 from routes_uploads import router as uploads_router
 from routes_orders import router as orders_router
 from routes_admin_h2h import router as admin_h2h_router
 from routes_products import router as products_router
-from dependencies import require_admin, require_telegram_webapp
 
+# DB
+from database import db, close_mongo_connection
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
-
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -94,8 +90,8 @@ async def get_status_checks():
 app.include_router(api_router)
 app.include_router(uploads_router)
 app.include_router(orders_router)
-app.include_router(products_router)
 app.include_router(admin_h2h_router)
+app.include_router(products_router)
 
 origins = [o for o in os.environ.get('CORS_ORIGINS', '').split(',') if o]
 if not origins:
@@ -118,4 +114,4 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    await close_mongo_connection()

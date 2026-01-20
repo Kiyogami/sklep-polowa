@@ -3,7 +3,7 @@ from typing import List
 from datetime import datetime, timezone
 import uuid
 
-from server import db  # reuse global Mongo client from server.py
+from database import db
 from models_order import OrderIn, OrderOut
 from dependencies import require_telegram_webapp
 
