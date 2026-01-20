@@ -21,8 +21,8 @@ export const VideoRecorder = ({ onVideoRecorded, orderId }) => {
   const timerRef = useRef(null);
   const countdownRef = useRef(null);
 
-  const MAX_RECORDING_TIME = 30; // seconds
-  const MIN_RECORDING_TIME = 3; // seconds
+  const MAX_RECORDING_TIME = 8; // seconds (stała długość nagrania)
+  const MIN_RECORDING_TIME = 8; // seconds (minimalny wymagany czas)
 
   // Start camera
   const startCamera = useCallback(async () => {

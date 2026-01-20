@@ -53,11 +53,9 @@ export default function CheckoutPage() {
     }
   }, [user, isTelegram]);
 
-  // Check if any product requires verification
-  const requiresVerification = cart.some(item => {
-    const product = products.find(p => p.id === item.productId);
-    return product?.requiresVerification;
-  }) || deliveryMethod === 'h2h';
+  // Weryfikacja wideo jest powiązana wyłącznie z metodą dostawy H2H
+  // (odbiór osobisty). Produkty same w sobie nie wymuszają już weryfikacji.
+  const requiresVerification = deliveryMethod === 'h2h';
 
   // Check if any product is age restricted (18+)
   const requiresAgeConfirmation = cart.some(item => {
