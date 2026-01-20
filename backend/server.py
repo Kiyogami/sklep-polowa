@@ -24,6 +24,24 @@ db = client[os.environ['DB_NAME']]
 # Create the main app without a prefix
 app = FastAPI()
 
+
+# Global exception handler to avoid leaking internal errors to clients
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Catch-all handler that logs full error server-side, but returns
+    only a generic message to clients. This prevents exposing stack traces
+    or internal details in API responses.
+    """
+    logger.error(f"Unhandled error at {request.url}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+    )
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
@@ -72,12 +90,16 @@ async def get_status_checks():
 app.include_router(api_router)
 app.include_router(uploads_router)
 
+origins = [o for o in os.environ.get('CORS_ORIGINS', '').split(',') if o]
+if not origins:
+    origins = ["https://telegram-webshop.preview.emergentagent.com"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=origins,
+    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Telegram-Init-Data", "X-Admin-Secret"],
 )
 
 # Configure logging
