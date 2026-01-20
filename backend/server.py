@@ -101,6 +101,8 @@ if not origins:
     origins = ["https://prascy-shop.preview.emergentagent.com"]
 
 app.include_router(telegram_webhook_router)
+app.include_router(discounts_router)
+app.include_router(loyalty_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
