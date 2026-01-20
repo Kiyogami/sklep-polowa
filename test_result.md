@@ -236,6 +236,11 @@ test_plan:
     - "Mobile Responsiveness"
   test_all: false
   test_priority: "stuck_first"
+  completed_successfully:
+    - "Drug Category and 18+ Verification"
+    - "Store Home Page"
+    - "Product Detail Page"
+    - "Admin Panel"
 
 agent_communication:
   - agent: "testing"
