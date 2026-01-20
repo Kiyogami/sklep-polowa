@@ -1,7 +1,7 @@
 from fastapi import Header, HTTPException, status, Depends
 import os
 
-from .utils_telegram_webapp_auth import verify_telegram_webapp
+from utils_telegram_webapp_auth import verify_telegram_webapp
 
 
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "")
