@@ -43,6 +43,7 @@ function App() {
                 <Route path="/verification/:orderId" element={<VerificationPage />} />
                 <Route path="/order/:orderId" element={<OrderStatusPage />} />
                 <Route path="/payment-success/:orderId" element={<PaymentSuccessPage />} />
+<Route path="/info/:slug" element={<InfoPage />} />
                 <Route path="/orders" element={<MyOrdersPage />} />
                 
                 {/* Admin Routes */}
