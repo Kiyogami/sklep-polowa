@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from routes_uploads import router as uploads_router
 from routes_orders import router as orders_router
 from routes_admin_h2h import router as admin_h2h_router
+from routes_products import router as products_router
 from dependencies import require_admin, require_telegram_webapp
 
 
