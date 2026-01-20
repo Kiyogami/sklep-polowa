@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('blik');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptVerification, setAcceptVerification] = useState(false);
+  const [acceptAge, setAcceptAge] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState('details'); // details, payment
 
@@ -58,6 +59,12 @@ export default function CheckoutPage() {
     return product?.requiresVerification;
   }) || deliveryMethod === 'h2h';
 
+  // Check if any product is age restricted (18+)
+  const requiresAgeConfirmation = cart.some(item => {
+    const product = products.find(p => p.id === item.productId);
+    return product?.ageRestricted;
+  });
+
   const selectedDeliveryMethod = deliveryMethods.find(m => m.id === deliveryMethod);
   const deliveryCost = selectedDeliveryMethod?.price || 0;
   const subtotal = getCartTotal();
@@ -67,6 +74,7 @@ export default function CheckoutPage() {
     if (!customerData.name || !customerData.email || !customerData.phone) return false;
     if (!acceptTerms) return false;
     if (requiresVerification && !acceptVerification) return false;
+    if (requiresAgeConfirmation && !acceptAge) return false;
     if (deliveryMethod === 'inpost' && !lockerCode) return false;
     if (deliveryMethod === 'h2h' && !pickupLocation) return false;
     return true;
@@ -335,6 +343,19 @@ export default function CheckoutPage() {
                             Zgadzam się na weryfikację tożsamości poprzez nagranie wideo. 
                             Rozumiem, że nagranie będzie używane wyłącznie do weryfikacji zamówienia 
                             i zostanie usunięte po 30 dniach. *
+                          </Label>
+                        </div>
+                      )}
+
+                      {requiresAgeConfirmation && (
+                        <div className="flex items-start gap-3">
+                          <Checkbox 
+                            id="age-confirmation"
+                            checked={acceptAge}
+                            onCheckedChange={setAcceptAge}
+                          />
+                          <Label htmlFor="age-confirmation" className="text-sm text-muted-foreground cursor-pointer">
+                            Potwierdzam, że mam ukończone 18 lat i zamawiam produkty wyłącznie do własnego użytku. *
                           </Label>
                         </div>
                       )}

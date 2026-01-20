@@ -11,7 +11,8 @@ export const products = [
     variants: ['S', 'M', 'L', 'XL'],
     stock: { 'S': 5, 'M': 10, 'L': 8, 'XL': 3 },
     requiresVerification: true,
-    featured: true
+    featured: true,
+    ageRestricted: false
   },
   {
     id: '2',
@@ -290,11 +291,12 @@ export const paymentMethods = [
 ];
 
 export const categories = [
-  { id: 'all', name: 'Wszystkie', count: 6 },
+  { id: 'all', name: 'Wszystkie', count: 8 },
   { id: 'premium', name: 'Premium', count: 1 },
   { id: 'classic', name: 'Classic', count: 1 },
   { id: 'limited', name: 'Limited Edition', count: 1 },
   { id: 'sets', name: 'Zestawy', count: 1 },
   { id: 'elite', name: 'Elite', count: 1 },
-  { id: 'starter', name: 'Starter', count: 1 }
+  { id: 'starter', name: 'Starter', count: 1 },
+  { id: 'leki', name: 'Leki', count: 2 }
 ];
