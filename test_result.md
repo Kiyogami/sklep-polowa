@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the Prascy Bandyci e-commerce store at https://swift-cart-51.preview.emergentagent.com. This is a Telegram Web App-based online store with gold/black theme for Poland."
+user_problem_statement: "Test the Prascy Bandyci e-commerce store at https://telegram-webshop.preview.emergentagent.com. This is a Telegram Web App-based online store with gold/black theme for Poland."
 
 frontend:
   - task: "Store Home Page"
@@ -215,6 +215,6 @@ test_plan:
 
 agent_communication:
   - agent: "testing"
-    message: "Starting comprehensive testing of Prascy Bandyci e-commerce store. Will test all major flows including store pages, admin panel, and mobile responsiveness. Testing URL: https://swift-cart-51.preview.emergentagent.com"
+    message: "Starting comprehensive testing of Prascy Bandyci e-commerce store. Will test all major flows including store pages, admin panel, and mobile responsiveness. Testing URL: https://telegram-webshop.preview.emergentagent.com"
   - agent: "testing"
     message: "TESTING COMPLETED: Found critical issues in cart functionality and checkout process. Homepage, product detail, and admin panel working correctly. Cart items not displaying properly, checkout form validation preventing progression, and mobile responsiveness needs improvement. Payment integration incomplete - only BLIK visible, missing Stripe/Przelewy24/Telegram Pay options."
