@@ -72,7 +72,34 @@ export const products = [
     variants: ['Starter', 'Starter+'],
     stock: { 'Starter': 30, 'Starter+': 20 },
     requiresVerification: false,
-    featured: false
+    featured: false,
+    ageRestricted: false
+  },
+  {
+    id: '7',
+    name: 'Xanax 2mg',
+    description: 'Mocny preparat na uspokojenie. Tylko dla pełnoletnich klientów (18+).',
+    price: 249.99,
+    image: 'https://images.unsplash.com/photo-1587855209276-89dabc0d2c00?w=600',
+    category: 'leki',
+    variants: ['Blister 10 szt.', 'Blister 30 szt.'],
+    stock: { 'Blister 10 szt.': 20, 'Blister 30 szt.': 10 },
+    requiresVerification: true,
+    featured: true,
+    ageRestricted: true
+  },
+  {
+    id: '8',
+    name: 'Oxy 80mg',
+    description: 'Silny preparat przeciwbólowy. Wymaga pełnoletności i weryfikacji tożsamości.',
+    price: 399.99,
+    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=600',
+    category: 'leki',
+    variants: ['Blister 10 szt.', 'Blister 20 szt.'],
+    stock: { 'Blister 10 szt.': 15, 'Blister 20 szt.': 8 },
+    requiresVerification: true,
+    featured: false,
+    ageRestricted: true
   }
 ];
 
