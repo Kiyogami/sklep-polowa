@@ -1,12 +1,14 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ChevronRight, Clock, CheckCircle, Truck, Shield, AlertCircle, MapPin } from 'lucide-react';
+import { Package, ChevronRight, Clock, CheckCircle, Truck, Shield, AlertCircle, MapPin, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreFooter from '@/components/store/StoreFooter';
-import { useOrders } from '@/context/OrdersContext';
 import { useTelegram } from '@/context/TelegramContext';
+import { ordersApi } from '@/services/api';
+import { toast } from 'sonner';
 
 const statusConfig = {
   'pending_payment': { 
@@ -142,45 +144,31 @@ const OrderCard = ({ order }) => {
 };
 
 export default function MyOrdersPage() {
-  const { orders } = useOrders();
   const { user, isTelegram } = useTelegram();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Demo orders if no real orders exist
-  const demoOrders = [
-    {
-      id: 'ORD-DEMO-001',
-      status: 'shipped',
-      items: [
-        { name: 'BUCH Premium', variant: 'L', quantity: 1, price: 299.99 }
-      ],
-      total: 312.98,
-      deliveryMethod: 'inpost',
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ORD-DEMO-002',
-      status: 'verification_pending',
-      items: [
-        { name: 'KOKO Gold Edition', variant: 'Platinum', quantity: 1, price: 449.99 }
-      ],
-      total: 449.99,
-      deliveryMethod: 'h2h',
-      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 'ORD-DEMO-003',
-      status: 'delivered',
-      items: [
-        { name: 'MEF Classic', variant: 'Standard', quantity: 2, price: 199.99 },
-        { name: 'PIGULY Set', variant: '3-Pack', quantity: 1, price: 349.99 }
-      ],
-      total: 762.96,
-      deliveryMethod: 'inpost',
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  ];
-
-  const displayOrders = orders.length > 0 ? orders : demoOrders;
+  useEffect(() => {
+    const fetchOrders = async () => {
+        try {
+            // Check if we have initData, otherwise this might fail if strictly protected
+            if (!isTelegram && process.env.NODE_ENV === 'production') {
+                // In production web (not telegram), we might not be able to fetch if auth depends on it
+                // For now, try fetching anyway
+            }
+            const data = await ordersApi.getMyOrders();
+            setOrders(data);
+        } catch (error) {
+            console.error("Failed to fetch orders:", error);
+            // toast.error("Nie udało się pobrać listy zamówień");
+            // Fallback to empty or demo if needed, but better show nothing or error
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    fetchOrders();
+  }, [isTelegram]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -200,39 +188,41 @@ export default function MyOrdersPage() {
             )}
           </div>
 
-          {/* Orders List */}
-          {displayOrders.length > 0 ? (
-            <div className="space-y-4">
-              {displayOrders.map((order) => (
-                <OrderCard key={order.id} order={order} />
-              ))}
-            </div>
-          ) : (
-            <Card className="bg-card border-border">
-              <CardContent className="py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  <Package className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h2 className="text-lg font-semibold text-foreground mb-2">
-                  Brak zamówień
-                </h2>
-                <p className="text-muted-foreground mb-6">
-                  Nie masz jeszcze żadnych zamówień. Zacznij zakupy!
-                </p>
-                <Link to="/">
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    Przeglądaj produkty
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+          {/* Loading */}
+          {loading && (
+             <div className="flex justify-center py-10">
+                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
+             </div>
           )}
 
-          {/* Info note */}
-          {orders.length === 0 && displayOrders.length > 0 && (
-            <p className="text-xs text-muted-foreground text-center mt-6">
-              * Pokazane zamówienia są przykładowe (demo)
-            </p>
+          {/* Orders List */}
+          {!loading && (
+              orders.length > 0 ? (
+                <div className="space-y-4">
+                  {orders.map((order) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+              ) : (
+                <Card className="bg-card border-border">
+                  <CardContent className="py-12 text-center">
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                      <Package className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-foreground mb-2">
+                      Brak zamówień
+                    </h2>
+                    <p className="text-muted-foreground mb-6">
+                      Nie masz jeszcze żadnych zamówień. Zacznij zakupy!
+                    </p>
+                    <Link to="/">
+                      <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                        Przeglądaj produkty
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )
           )}
         </div>
       </main>
