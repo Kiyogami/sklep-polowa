@@ -33,8 +33,12 @@ export const productsApi = {
 export const ordersApi = {
   create: (data) => api.post('/api/orders', data).then(res => res.data),
   getById: (id) => api.get(`/api/orders/${id}`).then(res => res.data),
-  getMyOrders: () => api.get('/api/orders').then(res => res.data), // TODO: Filter by user
+  getMyOrders: () => api.get('/api/orders').then(res => res.data),
   validateDiscount: (code, total) => api.post('/api/discounts/validate', { code, orderTotal: total }).then(res => res.data),
+};
+
+export const loyaltyApi = {
+  getStatus: () => api.get('/api/loyalty/status').then(res => res.data),
 };
 
 export const adminApi = {
