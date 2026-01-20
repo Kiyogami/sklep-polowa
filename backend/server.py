@@ -98,6 +98,7 @@ origins = [o for o in os.environ.get('CORS_ORIGINS', '').split(',') if o]
 if not origins:
     origins = ["https://prascy-shop.preview.emergentagent.com"]
 
+app.include_router(telegram_webhook_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
