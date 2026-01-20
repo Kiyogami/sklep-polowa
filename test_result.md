@@ -139,7 +139,7 @@ frontend:
     implemented: true
     working: false
     file: "/app/frontend/src/pages/store/CartPage.jsx"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -149,6 +149,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "CRITICAL ISSUE: Cart functionality partially broken. Products can be added to cart (button works), but cart page shows items inconsistently. Cart counter/badge not visible. Quantity controls not found. This affects core e-commerce functionality."
+      - working: false
+        agent: "testing"
+        comment: "RETESTED: Cart functionality remains unstable. Products can be added (Xanax 2mg added successfully) but cart becomes empty when navigating between pages. This prevents completing the full checkout flow for drug products with 18+ verification."
 
   - task: "Checkout Page"
     implemented: true
