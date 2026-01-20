@@ -368,19 +368,9 @@ export const VideoRecorder = ({ onVideoRecorded, orderId }) => {
           )}
           
           {status === 'recording' && (
-            <Button 
-              onClick={stopRecording}
-              variant="outline"
-              className="w-full border-destructive text-destructive hover:bg-destructive/10"
-              size="lg"
-              disabled={recordingTime < MIN_RECORDING_TIME}
-            >
-              <StopCircle className="w-5 h-5 mr-2" />
-              {recordingTime < MIN_RECORDING_TIME 
-                ? `Poczekaj ${MIN_RECORDING_TIME - recordingTime}s...`
-                : 'Zatrzymaj nagrywanie'
-              }
-            </Button>
+            <p className="text-sm text-muted-foreground text-center">
+              Nagrywanie zakończy się automatycznie po {MAX_RECORDING_TIME} sekundach.
+            </p>
           )}
           
           {status === 'recorded' && (
