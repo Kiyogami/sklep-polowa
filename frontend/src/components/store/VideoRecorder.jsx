@@ -221,7 +221,7 @@ export const VideoRecorder = ({ onVideoRecorded, orderId }) => {
           Nagranie weryfikacyjne
         </CardTitle>
         <CardDescription>
-          Nagraj krótkie wideo (5-10 sekund) pokazując twarz
+          Nagraj krótkie wideo (około 8 sekund) pokazując twarz
         </CardDescription>
       </CardHeader>
       
