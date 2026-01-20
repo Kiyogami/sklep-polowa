@@ -3,14 +3,15 @@ from typing import Annotated
 import os
 
 from storage_service import SupabaseStorageService
-from supabase_client import supabase_client
+from supabase_client import get_supabase_client
 
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 
 
 def get_storage_service() -> SupabaseStorageService:
-    return SupabaseStorageService(supabase_client)
+    client = get_supabase_client()
+    return SupabaseStorageService(client)
 
 
 @router.post("/video")
