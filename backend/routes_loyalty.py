@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from server import db
+from database import db
 from models_loyalty import LoyaltyStatus
 from dependencies import require_telegram_webapp
 
