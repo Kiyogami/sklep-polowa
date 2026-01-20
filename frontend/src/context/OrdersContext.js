@@ -22,9 +22,13 @@ export const OrdersProvider = ({ children }) => {
 
   // Add new order
   const addOrder = (orderData) => {
+    const baseId = orderData.orderId || `ORD-${Date.now().toString().slice(-6)}`;
+
     const newOrder = {
-      id: orderData.orderId || `ORD-${Date.now().toString().slice(-6)}`,
+      id: baseId,
       ...orderData,
+      // jeśli zamówienie wymaga weryfikacji, startujemy ze statusem "oczekuje" po stronie weryfikacji
+      verificationStatus: orderData.requiresVerification ? 'pending' : orderData.verificationStatus ?? null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -32,6 +36,7 @@ export const OrdersProvider = ({ children }) => {
     setOrders(prev => [newOrder, ...prev]);
     return newOrder;
   };
+
 
   // Update order status
   const updateOrderStatus = (orderId, status, additionalData = {}) => {
