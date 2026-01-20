@@ -92,6 +92,8 @@ async def get_status_checks():
 # Include the router in the main app
 app.include_router(api_router)
 app.include_router(uploads_router)
+app.include_router(orders_router)
+app.include_router(admin_h2h_router)
 
 origins = [o for o in os.environ.get('CORS_ORIGINS', '').split(',') if o]
 if not origins:
