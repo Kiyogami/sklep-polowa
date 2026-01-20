@@ -1,8 +1,6 @@
-import { useState } from 'react';
-import { Shield, Clock, CheckCircle, XCircle, Filter } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useState, useEffect } from 'react';
+import { Shield, Clock, CheckCircle, XCircle, Filter, Loader2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -11,11 +9,46 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import VerificationCard from '@/components/admin/VerificationCard';
-import { verifications } from '@/data/mockData';
+import { adminApi } from '@/services/api'; // Import API
 import { toast } from 'sonner';
 
 export default function AdminVerifications() {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [verifications, setVerifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch verifications from API
+  const fetchVerifications = async () => {
+    try {
+      setLoading(true);
+      const data = await adminApi.getVerifications();
+      // data from API is list of OrderOut
+      // Map OrderOut to verification format if needed, or pass OrderOut directly
+      // VerificationCard expects: { id, orderId, customerName, status, videoUrl, ... }
+      // OrderOut has: { id, customer: { name }, verification: { status, videoUrl }, ... }
+      
+      const mapped = data.map(order => ({
+          id: order.id, // verification id not distinct in OrderOut, usually one per order
+          orderId: order.id,
+          customerName: order.customer.name,
+          status: order.verification.status,
+          videoUrl: order.verification.videoUrl,
+          submittedAt: order.updatedAt, // Approximate
+          notes: order.verification.notes
+      }));
+      
+      setVerifications(mapped);
+    } catch (error) {
+      console.error('Failed to fetch verifications:', error);
+      toast.error('Błąd pobierania weryfikacji');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVerifications();
+  }, []);
 
   const filteredVerifications = verifications.filter(v => 
     statusFilter === 'all' || v.status === statusFilter
@@ -29,16 +62,24 @@ export default function AdminVerifications() {
     rejected: verifications.filter(v => v.status === 'rejected').length,
   };
 
-  const handleApprove = (verificationId, notes) => {
-    toast.success('Weryfikacja zatwierdzona', {
-      description: `Weryfikacja ${verificationId} została zatwierdzona`
-    });
+  const handleApprove = async (verificationId, notes) => {
+    try {
+        await adminApi.updateVerification(verificationId, 'approved');
+        toast.success('Weryfikacja zatwierdzona');
+        fetchVerifications(); // Refresh
+    } catch (error) {
+        toast.error('Błąd zatwierdzania');
+    }
   };
 
-  const handleReject = (verificationId, reason) => {
-    toast.error('Weryfikacja odrzucona', {
-      description: `Weryfikacja ${verificationId} została odrzucona`
-    });
+  const handleReject = async (verificationId, reason) => {
+    try {
+        await adminApi.updateVerification(verificationId, 'rejected');
+        toast.success('Weryfikacja odrzucona');
+        fetchVerifications(); // Refresh
+    } catch (error) {
+        toast.error('Błąd odrzucania');
+    }
   };
 
   return (
@@ -129,8 +170,16 @@ export default function AdminVerifications() {
         </Select>
       </div>
 
+      {/* Loading */}
+      {loading && (
+          <div className="flex justify-center py-10">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+      )}
+
       {/* Verifications Grid */}
-      {filteredVerifications.length > 0 ? (
+      {!loading && (
+        filteredVerifications.length > 0 ? (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredVerifications.map((verification) => (
             <VerificationCard
@@ -141,13 +190,14 @@ export default function AdminVerifications() {
             />
           ))}
         </div>
-      ) : (
+        ) : (
         <Card className="bg-card border-border">
           <CardContent className="py-12 text-center">
             <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">Brak weryfikacji do wyświetlenia</p>
           </CardContent>
         </Card>
+        )
       )}
     </div>
   );
