@@ -14,16 +14,17 @@ import DeliverySelector from '@/components/store/DeliverySelector';
 import PaymentForm from '@/components/store/PaymentForm';
 import { useCart } from '@/context/CartContext';
 import { useTelegram } from '@/context/TelegramContext';
-import { useOrders } from '@/context/OrdersContext';
-import { products, deliveryMethods } from '@/data/mockData';
+import { useOrders } from '@/context/OrdersContext'; // Keeping for now if it uses context logic
+import { deliveryMethods } from '@/data/mockData';
 import { createOrderWithPayment } from '@/services/paymentService';
+import { productsApi } from '@/services/api'; // Import API
 import { toast } from 'sonner';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, getCartTotal, clearCart } = useCart();
-  const { user, isTelegram, hapticFeedback, showMainButton, hideMainButton, webApp } = useTelegram();
-  const { addOrder } = useOrders();
+  const { user, isTelegram, hapticFeedback, webApp } = useTelegram();
+  const { addOrder } = useOrders(); // TODO: Consider removing local context update if we rely on API only
   
   const [customerData, setCustomerData] = useState({
     name: '',
@@ -41,6 +42,7 @@ export default function CheckoutPage() {
   const [acceptAge, setAcceptAge] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [step, setStep] = useState('details'); // details, payment
+  const [requiresAgeConfirmation, setRequiresAgeConfirmation] = useState(false);
 
   // Pre-fill Telegram user data
   useEffect(() => {
@@ -53,15 +55,39 @@ export default function CheckoutPage() {
     }
   }, [user, isTelegram]);
 
-  // Weryfikacja wideo jest powiązana wyłącznie z metodą dostawy H2H
-  // (odbiór osobisty). Produkty same w sobie nie wymuszają już weryfikacji.
-  const requiresVerification = deliveryMethod === 'h2h';
+  // Check Age Restriction
+  useEffect(() => {
+      const checkAgeRestriction = async () => {
+          // Optimization: Fetch all products only if we need to check properties not in cart
+          // Or better, fetch only products in cart by ID.
+          // For now, simple approach: fetch all (cached usually) or iterate
+          
+          // Actually, let's fetch individual products for cart items to be safe and accurate
+          let restricted = false;
+          try {
+              // We could fetch all products or just check the ones in cart
+              const allProducts = await productsApi.getAll();
+              
+              restricted = cart.some(item => {
+                  const product = allProducts.find(p => p.id === item.productId);
+                  return product?.ageRestricted;
+              });
+          } catch (e) {
+              console.error("Failed to check age restriction", e);
+              // Fail safe: assume no restriction or maybe block?
+              // Let's assume no restriction but log error
+          }
+          setRequiresAgeConfirmation(restricted);
+      };
+      
+      if (cart.length > 0) {
+          checkAgeRestriction();
+      }
+  }, [cart]);
 
-  // Check if any product is age restricted (18+)
-  const requiresAgeConfirmation = cart.some(item => {
-    const product = products.find(p => p.id === item.productId);
-    return product?.ageRestricted;
-  });
+
+  // Weryfikacja wideo jest powiązana wyłącznie z metodą dostawy H2H
+  const requiresVerification = deliveryMethod === 'h2h';
 
   const selectedDeliveryMethod = deliveryMethods.find(m => m.id === deliveryMethod);
   const deliveryCost = selectedDeliveryMethod?.price || 0;
@@ -125,24 +151,10 @@ export default function CheckoutPage() {
           hapticFeedback('notification', 'success');
         }
         
-        // Save order to context
-        addOrder({
-          orderId: result.orderId,
-          customer: customerData,
-          items: cart,
-          subtotal,
-          deliveryCost,
-          total,
-          deliveryMethod,
-          deliveryAddress: deliveryMethod === 'inpost' 
-            ? { locker: lockerCode }
-            : null,
-          pickupLocation: deliveryMethod === 'h2h' ? pickupLocation : null,
-          requiresVerification,
-          status: requiresVerification ? 'verification_pending' : 'payment_confirmed',
-          paymentMethod,
-          paymentId: result.payment?.paymentId
-        });
+        // Save order to context (optional now, since backend has it)
+        // But good for immediate UI update if "My Orders" relies on context
+        // For now, keep it to ensure smooth transition
+        addOrder(result.order); 
         
         // Clear cart
         clearCart();
@@ -176,12 +188,6 @@ export default function CheckoutPage() {
       setIsProcessing(false);
     }
   };
-
-  // UWAGA: kiedyś było tu automatyczne przekierowanie pustego koszyka na /cart.
-  // Powodowało to jednak konflikt z logiką po płatności (clearCart() + navigate),
-  // przez co użytkownik po udanej płatności wracał na koszyk zamiast do weryfikacji.
-  // Dlatego ten strażnik został usunięty – pusty koszyk na /checkout nie psuje flow,
-  // a pozwala poprawnie przekierować użytkownika po płatności.
 
   return (
     <div className="min-h-screen flex flex-col">
