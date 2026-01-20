@@ -34,6 +34,7 @@ export const ordersApi = {
   create: (data) => api.post('/api/orders', data).then(res => res.data),
   getById: (id) => api.get(`/api/orders/${id}`).then(res => res.data),
   getMyOrders: () => api.get('/api/orders').then(res => res.data), // TODO: Filter by user
+  validateDiscount: (code, total) => api.post('/api/discounts/validate', { code, orderTotal: total }).then(res => res.data),
 };
 
 export const adminApi = {
