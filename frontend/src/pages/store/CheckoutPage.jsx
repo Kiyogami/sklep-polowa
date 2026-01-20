@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Shield, Send } from 'lucide-react';
+import { ArrowLeft, Lock, Shield, Send, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,14 +17,14 @@ import { useTelegram } from '@/context/TelegramContext';
 import { useOrders } from '@/context/OrdersContext'; // Keeping for now if it uses context logic
 import { deliveryMethods } from '@/data/mockData';
 import { createOrderWithPayment } from '@/services/paymentService';
-import { productsApi } from '@/services/api'; // Import API
+import { productsApi, ordersApi } from '@/services/api'; // Import API
 import { toast } from 'sonner';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, getCartTotal, clearCart } = useCart();
   const { user, isTelegram, hapticFeedback, webApp } = useTelegram();
-  const { addOrder } = useOrders(); // TODO: Consider removing local context update if we rely on API only
+  const { addOrder } = useOrders(); 
   
   const [customerData, setCustomerData] = useState({
     name: '',
@@ -44,6 +44,11 @@ export default function CheckoutPage() {
   const [step, setStep] = useState('details'); // details, payment
   const [requiresAgeConfirmation, setRequiresAgeConfirmation] = useState(false);
 
+  // Discounts
+  const [discountCode, setDiscountCode] = useState('');
+  const [discountApplied, setDiscountApplied] = useState(null);
+  const [discountLoading, setDiscountLoading] = useState(false);
+
   // Pre-fill Telegram user data
   useEffect(() => {
     if (user && isTelegram) {
@@ -58,14 +63,8 @@ export default function CheckoutPage() {
   // Check Age Restriction
   useEffect(() => {
       const checkAgeRestriction = async () => {
-          // Optimization: Fetch all products only if we need to check properties not in cart
-          // Or better, fetch only products in cart by ID.
-          // For now, simple approach: fetch all (cached usually) or iterate
-          
-          // Actually, let's fetch individual products for cart items to be safe and accurate
           let restricted = false;
           try {
-              // We could fetch all products or just check the ones in cart
               const allProducts = await productsApi.getAll();
               
               restricted = cart.some(item => {
@@ -74,8 +73,6 @@ export default function CheckoutPage() {
               });
           } catch (e) {
               console.error("Failed to check age restriction", e);
-              // Fail safe: assume no restriction or maybe block?
-              // Let's assume no restriction but log error
           }
           setRequiresAgeConfirmation(restricted);
       };
@@ -92,7 +89,10 @@ export default function CheckoutPage() {
   const selectedDeliveryMethod = deliveryMethods.find(m => m.id === deliveryMethod);
   const deliveryCost = selectedDeliveryMethod?.price || 0;
   const subtotal = getCartTotal();
-  const total = subtotal + deliveryCost;
+  const totalBeforeDiscount = subtotal + deliveryCost;
+  
+  const discountAmount = discountApplied ? discountApplied.discountAmount : 0;
+  const total = Math.max(0, totalBeforeDiscount - discountAmount);
 
   const isDetailsValid = () => {
     if (!customerData.name || !customerData.email || !customerData.phone) return false;
@@ -117,6 +117,30 @@ export default function CheckoutPage() {
     setStep('payment');
   };
 
+  const handleApplyDiscount = async () => {
+      if (!discountCode.trim()) return;
+      setDiscountLoading(true);
+      try {
+          // Send total excluding delivery usually, or including? 
+          // Let's send subtotal as base for percentage, but fixed amount applies to total order.
+          // API expects orderTotal. Let's send subtotal for safety if percentage.
+          // Or just total. Let's send subtotal.
+          const result = await ordersApi.validateDiscount(discountCode, subtotal);
+          if (result.valid) {
+              setDiscountApplied(result);
+              toast.success(result.message);
+          } else {
+              setDiscountApplied(null);
+              toast.error(result.message || "Kod nieprawidłowy");
+          }
+      } catch (error) {
+          toast.error("Błąd weryfikacji kodu");
+          setDiscountApplied(null);
+      } finally {
+          setDiscountLoading(false);
+      }
+  };
+
   const handlePaymentSubmit = async (paymentDetails) => {
     setIsProcessing(true);
     
@@ -135,7 +159,9 @@ export default function CheckoutPage() {
         ? { locker: lockerCode }
         : null,
       pickupLocation: deliveryMethod === 'h2h' ? pickupLocation : null,
-      requiresVerification
+      requiresVerification,
+      discountCode: discountApplied ? discountCode : null,
+      discountAmount: discountAmount
     };
 
     try {
@@ -152,8 +178,6 @@ export default function CheckoutPage() {
         }
         
         // Save order to context (optional now, since backend has it)
-        // But good for immediate UI update if "My Orders" relies on context
-        // For now, keep it to ensure smooth transition
         addOrder(result.order); 
         
         // Clear cart
@@ -421,6 +445,37 @@ export default function CheckoutPage() {
 
                   <Separator className="my-4 bg-border" />
 
+                  {/* Discount Code */}
+                   <div className="mb-4">
+                      <Label className="text-xs font-medium mb-1.5 block">Kod rabatowy</Label>
+                      <div className="flex gap-2">
+                          <Input 
+                              placeholder="Wpisz kod..." 
+                              value={discountCode}
+                              onChange={(e) => setDiscountCode(e.target.value)}
+                              disabled={!!discountApplied || discountLoading}
+                              className="h-9 bg-background"
+                          />
+                          <Button 
+                              size="sm" 
+                              variant={discountApplied ? "outline" : "default"}
+                              className="h-9"
+                              onClick={() => discountApplied ? setDiscountApplied(null) : handleApplyDiscount()}
+                              disabled={discountLoading}
+                          >
+                              {discountLoading ? "..." : discountApplied ? "Usuń" : "Użyj"}
+                          </Button>
+                      </div>
+                      {discountApplied && (
+                          <div className="flex items-center gap-1 mt-2 text-xs text-success animate-in fade-in slide-in-from-top-1">
+                              <Tag className="w-3 h-3" />
+                              <span>Kod aktywny: -{discountApplied.discountAmount.toFixed(2)} zł</span>
+                          </div>
+                      )}
+                  </div>
+                  
+                  <Separator className="my-4 bg-border" />
+
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Produkty</span>
@@ -432,6 +487,12 @@ export default function CheckoutPage() {
                         {deliveryCost > 0 ? `${deliveryCost.toFixed(2)} zł` : 'Gratis'}
                       </span>
                     </div>
+                     {discountApplied && (
+                        <div className="flex justify-between text-sm text-success font-medium">
+                           <span>Rabat</span>
+                           <span>-{discountAmount.toFixed(2)} zł</span>
+                        </div>
+                     )}
                   </div>
 
                   <Separator className="my-4 bg-border" />
