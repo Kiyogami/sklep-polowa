@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Package, ChevronRight, Clock, CheckCircle, Truck, Shield, AlertCircle, MapPin, Loader2 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Package, ChevronRight, Clock, CheckCircle, Truck, Shield, AlertCircle, MapPin, Loader2, Award, Zap } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreFooter from '@/components/store/StoreFooter';
 import { useTelegram } from '@/context/TelegramContext';
-import { ordersApi } from '@/services/api';
+import { ordersApi, loyaltyApi } from '@/services/api';
 import { toast } from 'sonner';
 
 const statusConfig = {
@@ -146,28 +147,26 @@ const OrderCard = ({ order }) => {
 export default function MyOrdersPage() {
   const { user, isTelegram } = useTelegram();
   const [orders, setOrders] = useState([]);
+  const [loyalty, setLoyalty] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchData = async () => {
         try {
-            // Check if we have initData, otherwise this might fail if strictly protected
-            if (!isTelegram && process.env.NODE_ENV === 'production') {
-                // In production web (not telegram), we might not be able to fetch if auth depends on it
-                // For now, try fetching anyway
-            }
-            const data = await ordersApi.getMyOrders();
-            setOrders(data);
+            const [ordersData, loyaltyData] = await Promise.all([
+                ordersApi.getMyOrders().catch(e => []),
+                loyaltyApi.getStatus().catch(e => null)
+            ]);
+            setOrders(ordersData);
+            setLoyalty(loyaltyData);
         } catch (error) {
-            console.error("Failed to fetch orders:", error);
-            // toast.error("Nie udało się pobrać listy zamówień");
-            // Fallback to empty or demo if needed, but better show nothing or error
+            console.error("Failed to fetch data:", error);
         } finally {
             setLoading(false);
         }
     };
     
-    fetchOrders();
+    fetchData();
   }, [isTelegram]);
 
   return (
@@ -177,8 +176,8 @@ export default function MyOrdersPage() {
       <main className="flex-1 py-6 sm:py-8">
         <div className="container mx-auto px-4 max-w-2xl">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground mb-2">
+          <div className="mb-6 flex flex-col gap-1">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
               Moje zamówienia
             </h1>
             {isTelegram && user && (
@@ -188,16 +187,55 @@ export default function MyOrdersPage() {
             )}
           </div>
 
-          {/* Loading */}
-          {loading && (
+           {/* Loading */}
+           {loading && (
              <div className="flex justify-center py-10">
                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
              </div>
           )}
 
-          {/* Orders List */}
           {!loading && (
-              orders.length > 0 ? (
+            <div className="space-y-6">
+                
+              {/* Loyalty Card */}
+              {loyalty && (
+                <Card className="bg-gradient-to-br from-card to-primary/5 border-primary/20 overflow-hidden relative">
+                     <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <Award className="w-24 h-24 text-primary" />
+                     </div>
+                     <CardContent className="p-5 relative z-10">
+                         <div className="flex justify-between items-start mb-4">
+                             <div>
+                                 <p className="text-xs font-bold text-primary tracking-wider uppercase mb-1">Twój Poziom</p>
+                                 <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                                     {loyalty.level}
+                                     {loyalty.level === 'Boss' && <span className="text-xl">👑</span>}
+                                 </h2>
+                             </div>
+                             <div className="text-right">
+                                 <p className="text-xs text-muted-foreground mb-1">Punkty lojalnościowe</p>
+                                 <p className="text-xl font-mono font-bold text-primary">{loyalty.points} pkt</p>
+                             </div>
+                         </div>
+                         
+                         {loyalty.level !== 'Boss' && (
+                             <div className="space-y-2">
+                                 <div className="flex justify-between text-xs text-muted-foreground">
+                                     <span>Postęp do następnego poziomu</span>
+                                     <span>{Math.round(loyalty.progress)}%</span>
+                                 </div>
+                                 <Progress value={loyalty.progress} className="h-2 bg-muted/50" />
+                                 <p className="text-xs text-muted-foreground mt-1">
+                                     Brakuje {loyalty.nextLevelThreshold - loyalty.points} pkt do awansu.
+                                 </p>
+                             </div>
+                         )}
+                     </CardContent>
+                </Card>
+              )}
+            
+              {/* Orders List */}
+              {orders.length > 0 ? (
                 <div className="space-y-4">
                   {orders.map((order) => (
                     <OrderCard key={order.id} order={order} />
@@ -222,7 +260,8 @@ export default function MyOrdersPage() {
                     </Link>
                   </CardContent>
                 </Card>
-              )
+              )}
+            </div>
           )}
         </div>
       </main>
