@@ -65,4 +65,14 @@ def verify_telegram_webapp(init_data: str, max_age_seconds: int = 86400) -> Dict
 
     # put hash back if caller wants full dict
     data["hash"] = received_hash
+    
+    # Parse JSON fields (user is typically JSON-encoded)
+    if "user" in data:
+        try:
+            import json
+            data["user"] = json.loads(data["user"])
+        except (json.JSONDecodeError, TypeError):
+            # If parsing fails, leave as string
+            pass
+    
     return data
