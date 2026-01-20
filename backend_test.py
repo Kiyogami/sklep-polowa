@@ -387,6 +387,11 @@ def main():
     
     print(f"\n🎯 Overall: {passed}/{total} tests passed")
     
+    # Special note about Order Again Logic (frontend feature)
+    print("\n📝 FRONTEND FEATURE NOTE:")
+    print("   Order Again Logic: Frontend feature - requires code review")
+    print("   (This is handled in frontend components, not backend API)")
+    
     if passed == total:
         print("🎉 All backend tests PASSED!")
         return 0
