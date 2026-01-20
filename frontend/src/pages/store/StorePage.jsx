@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Filter, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,21 @@ export default function StorePage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  // Handle hash navigation for categories
+  useEffect(() => {
+    if (location.hash) {
+      const categoryFromHash = location.hash.replace('#', '');
+      // Check if this category exists
+      if (categories.some(c => c.id === categoryFromHash)) {
+        setSelectedCategory(categoryFromHash);
+        // Scroll to products section
+        const element = document.getElementById('products');
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -69,9 +85,9 @@ export default function StorePage() {
                     key={category.id}
                     variant={selectedCategory === category.id ? 'default' : 'outline'}
                     size="sm"
-                    className={`whitespace-nowrap ${
+                    className={`whitespace-nowrap transition-all ${
                       selectedCategory === category.id 
-                        ? 'bg-primary text-primary-foreground' 
+                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' 
                         : 'border-border hover:border-primary/50 hover:bg-primary/5'
                     }`}
                     onClick={() => setSelectedCategory(category.id)}
@@ -144,11 +160,11 @@ export default function StorePage() {
                 </div>
               </div>
               <div className="relative">
-                <div className="aspect-square rounded-2xl overflow-hidden border border-border">
+                <div className="aspect-square rounded-2xl overflow-hidden border border-border group">
                   <img 
                     src="https://images.pexels.com/photos/17419472/pexels-photo-17419472.jpeg?w=600" 
                     alt="Premium lifestyle"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
                 <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-primary/10 rounded-2xl -z-10" />

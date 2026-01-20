@@ -92,17 +92,17 @@ export const StoreFooter = () => {
             <h4 className="font-medium text-foreground mb-4">Informacje</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/info/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Regulamin
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/info/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Polityka prywatności
                 </Link>
               </li>
               <li>
-                <Link to="/verification-info" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/info/verification-info" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Weryfikacja tożsamości
                 </Link>
               </li>

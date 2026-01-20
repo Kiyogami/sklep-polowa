@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ShoppingBag, Menu, X, User, Package } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/context/CartContext';
@@ -11,6 +11,11 @@ export const StoreHeader = () => {
   const { getCartCount } = useCart();
   const { user, isTelegram } = useTelegram();
   const cartCount = getCartCount();
+  const location = useLocation();
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
@@ -18,10 +23,10 @@ export const StoreHeader = () => {
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-gold flex items-center justify-center">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-gold flex items-center justify-center shadow-lg group-hover:shadow-primary/20 transition-all">
               <span className="font-display font-bold text-sm sm:text-lg text-primary-foreground">PB</span>
             </div>
-            <span className="font-display text-lg sm:text-xl font-semibold text-gold-gradient hidden xs:block">
+            <span className="font-display text-lg sm:text-xl font-semibold text-gold-gradient block">
               Prascy Bandyci
             </span>
           </Link>
@@ -30,21 +35,24 @@ export const StoreHeader = () => {
           <nav className="hidden md:flex items-center gap-6">
             <Link 
               to="/" 
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group"
             >
               Sklep
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </Link>
             <Link 
               to="/orders" 
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group"
             >
               Moje zamówienia
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </Link>
             <Link 
-              to="/#about" 
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              to="/info/about" 
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group"
             >
               O nas
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
             </Link>
           </nav>
 
@@ -52,7 +60,7 @@ export const StoreHeader = () => {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* My Orders (Desktop icon) */}
             <Link to="/orders" className="hidden sm:block">
-              <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-10 sm:w-10">
+              <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-10 sm:w-10 hover:bg-primary/5 hover:text-primary">
                 <Package className="h-5 w-5" />
               </Button>
             </Link>
@@ -69,11 +77,11 @@ export const StoreHeader = () => {
 
             {/* Cart */}
             <Link to="/cart">
-              <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10">
+              <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10 hover:bg-primary/5 hover:text-primary transition-all hover:scale-105">
                 <ShoppingBag className="h-5 w-5" />
                 {cartCount > 0 && (
                   <Badge 
-                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-primary text-primary-foreground text-xs"
+                    className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-primary text-primary-foreground text-xs animate-in zoom-in"
                   >
                     {cartCount}
                   </Badge>
@@ -95,7 +103,7 @@ export const StoreHeader = () => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-border animate-fade-in">
+          <nav className="md:hidden py-4 border-t border-border animate-in slide-in-from-top-5 fade-in">
             <div className="flex flex-col gap-1">
               {isTelegram && user && (
                 <div className="flex items-center gap-2 px-2 py-3 rounded-lg bg-primary/5 mb-2">
@@ -112,24 +120,21 @@ export const StoreHeader = () => {
               )}
               <Link 
                 to="/" 
-                className="flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors px-2 py-3 rounded-lg hover:bg-muted"
-                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors px-2 py-3 rounded-lg hover:bg-primary/5"
               >
                 <ShoppingBag className="w-5 h-5" />
                 Sklep
               </Link>
               <Link 
                 to="/orders" 
-                className="flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors px-2 py-3 rounded-lg hover:bg-muted"
-                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors px-2 py-3 rounded-lg hover:bg-primary/5"
               >
                 <Package className="w-5 h-5" />
                 Moje zamówienia
               </Link>
               <Link 
-                to="/#about" 
-                className="flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors px-2 py-3 rounded-lg hover:bg-muted"
-                onClick={() => setMobileMenuOpen(false)}
+                to="/info/about" 
+                className="flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors px-2 py-3 rounded-lg hover:bg-primary/5"
               >
                 <User className="w-5 h-5" />
                 O nas

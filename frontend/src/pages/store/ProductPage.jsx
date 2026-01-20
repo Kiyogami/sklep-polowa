@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingBag, Shield, Truck, Package, Minus, Plus, Star } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Shield, Truck, Package, Minus, Plus, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreFooter from '@/components/store/StoreFooter';
-import { products } from '@/data/mockData';
+import { productsApi } from '@/services/api';
 import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
 
@@ -18,10 +18,40 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   
-  const product = products.find(p => p.id === id);
-  
-  const [selectedVariant, setSelectedVariant] = useState(product?.variants[0] || '');
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedVariant, setSelectedVariant] = useState('');
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await productsApi.getById(id);
+        setProduct(data);
+        if (data.variants && data.variants.length > 0) {
+            setSelectedVariant(data.variants[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+      return (
+        <div className="min-h-screen flex flex-col">
+          <StoreHeader />
+          <main className="flex-1 flex items-center justify-center">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </main>
+          <StoreFooter />
+        </div>
+      );
+  }
 
   if (!product) {
     return (
@@ -40,7 +70,7 @@ export default function ProductPage() {
     );
   }
 
-  const currentStock = product.stock[selectedVariant] || 0;
+  const currentStock = (product.stock && product.stock[selectedVariant]) || 0;
   const isInStock = currentStock > 0;
 
   const handleAddToCart = () => {
@@ -77,11 +107,11 @@ export default function ProductPage() {
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Product Image */}
             <div className="space-y-4">
-              <div className="aspect-square rounded-2xl overflow-hidden bg-card border border-border">
+              <div className="aspect-square rounded-2xl overflow-hidden bg-card border border-border group">
                 <img 
                   src={product.image} 
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
               
@@ -148,7 +178,7 @@ export default function ProductPage() {
                   className="flex flex-wrap gap-3"
                 >
                   {product.variants.map((variant) => {
-                    const stock = product.stock[variant] || 0;
+                    const stock = product.stock ? product.stock[variant] || 0 : 0;
                     const available = stock > 0;
                     
                     return (
@@ -217,7 +247,7 @@ export default function ProductPage() {
               <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <Button
                   size="lg"
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 btn-gold-glow"
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 btn-gold-glow transition-all hover:scale-[1.02]"
                   onClick={handleBuyNow}
                   disabled={!isInStock}
                 >
@@ -227,7 +257,7 @@ export default function ProductPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="flex-1 border-border hover:bg-muted hover:border-primary/50"
+                  className="flex-1 border-border hover:bg-muted hover:border-primary/50 transition-all hover:scale-[1.02]"
                   onClick={handleAddToCart}
                   disabled={!isInStock}
                 >
