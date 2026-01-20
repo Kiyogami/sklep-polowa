@@ -179,15 +179,11 @@ export default function CheckoutPage() {
     }
   };
 
-  // Jeśli koszyk jest pusty i nie przetwarzamy właśnie płatności,
-  // przekieruj użytkownika z powrotem do koszyka.
-  // Podczas finalizacji zamówienia (isProcessing=true) pozwalamy na
-  // chwilowo pusty koszyk, żeby móc bezpiecznie przekierować na
-  // stronę sukcesu / weryfikacji.
-  if (cart.length === 0 && !isProcessing) {
-    navigate('/cart');
-    return null;
-  }
+  // UWAGA: kiedyś było tu automatyczne przekierowanie pustego koszyka na /cart.
+  // Powodowało to jednak konflikt z logiką po płatności (clearCart() + navigate),
+  // przez co użytkownik po udanej płatności wracał na koszyk zamiast do weryfikacji.
+  // Dlatego ten strażnik został usunięty – pusty koszyk na /checkout nie psuje flow,
+  // a pozwala poprawnie przekierować użytkownika po płatności.
 
   return (
     <div className="min-h-screen flex flex-col">
