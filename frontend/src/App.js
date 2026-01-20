@@ -11,6 +11,7 @@ import VerificationPage from "@/pages/store/VerificationPage";
 import OrderStatusPage from "@/pages/store/OrderStatusPage";
 import PaymentSuccessPage from "@/pages/store/PaymentSuccessPage";
 import MyOrdersPage from "@/pages/store/MyOrdersPage";
+import InfoPage from "@/pages/store/InfoPage";
 
 // Admin Pages
 import AdminLayout from "@/pages/admin/AdminLayout";
