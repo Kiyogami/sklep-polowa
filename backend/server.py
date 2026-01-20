@@ -97,7 +97,7 @@ app.include_router(admin_h2h_router)
 
 origins = [o for o in os.environ.get('CORS_ORIGINS', '').split(',') if o]
 if not origins:
-    origins = ["https://telegram-webshop.preview.emergentagent.com"]
+    origins = ["https://prascy-shop.preview.emergentagent.com"]
 
 app.add_middleware(
     CORSMiddleware,
