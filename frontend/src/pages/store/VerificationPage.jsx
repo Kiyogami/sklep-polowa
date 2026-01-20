@@ -23,6 +23,15 @@ export default function VerificationPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [verificationId, setVerificationId] = useState(null);
 
+  // Za każdym razem, gdy wchodzimy w weryfikację dla innego zamówienia,
+  // resetujemy stan kroków, żeby nie "pamiętać" poprzedniego nagrania.
+  useEffect(() => {
+    setStep('info');
+    setAcceptedTerms(false);
+    setUploadProgress(0);
+    setVerificationId(null);
+  }, [orderId]);
+
   // Handle video recorded
   const handleVideoRecorded = async (videoBlob, orderId) => {
     setStep('uploading');
