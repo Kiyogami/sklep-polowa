@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from server import db
+from database import db
 from models_discount import DiscountCode, DiscountValidateRequest, DiscountValidateResponse
 import logging
 
