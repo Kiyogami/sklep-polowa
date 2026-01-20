@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle, Package, MessageCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,17 +6,29 @@ import StoreHeader from '@/components/store/StoreHeader';
 import StoreFooter from '@/components/store/StoreFooter';
 import { useTelegram } from '@/context/TelegramContext';
 import { useEffect } from 'react';
+import { useOrders } from '@/context/OrdersContext';
 
 export default function PaymentSuccessPage() {
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const { isTelegram, hapticFeedback, sendData, close } = useTelegram();
+  const { getOrder } = useOrders();
+
+  const order = orderId ? getOrder(orderId) : null;
 
   useEffect(() => {
+    // Jeśli zamówienie nadal wymaga weryfikacji, a trafiliśmy na stronę sukcesu,
+    // przekieruj użytkownika na ekran nagrywania.
+    if (order && order.requiresVerification && order.status === 'verification_pending') {
+      navigate(`/verification/${orderId}`, { replace: true });
+      return;
+    }
+
     // Haptic feedback on success
     if (isTelegram) {
       hapticFeedback('notification', 'success');
     }
-  }, [isTelegram, hapticFeedback]);
+  }, [order, orderId, isTelegram, hapticFeedback, navigate]);
 
   const handleSendToBot = () => {
     if (isTelegram) {
