@@ -15,6 +15,8 @@ from routes_orders import router as orders_router
 from routes_admin_h2h import router as admin_h2h_router
 from routes_products import router as products_router
 from routes_telegram_webhook import router as telegram_webhook_router
+from routes_discounts import router as discounts_router
+from routes_loyalty import router as loyalty_router
 
 # DB
 from database import db, close_mongo_connection
