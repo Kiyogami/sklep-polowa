@@ -179,7 +179,12 @@ export default function CheckoutPage() {
     }
   };
 
-  if (cart.length === 0) {
+  // Jeśli koszyk jest pusty i nie przetwarzamy właśnie płatności,
+  // przekieruj użytkownika z powrotem do koszyka.
+  // Podczas finalizacji zamówienia (isProcessing=true) pozwalamy na
+  // chwilowo pusty koszyk, żeby móc bezpiecznie przekierować na
+  // stronę sukcesu / weryfikacji.
+  if (cart.length === 0 && !isProcessing) {
     navigate('/cart');
     return null;
   }
